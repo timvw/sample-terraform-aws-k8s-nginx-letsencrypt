@@ -1,11 +1,8 @@
+notes for building a kubernetes cluster on AWS with Terraform
+
 terraform init
 terraform apply -auto-approve
 aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name demo
-
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml
-
-kubectl get all --all-namespaces
-
 
 aws ec2 describe-regions | \
   jq -r '.Regions[] | .RegionName' | \
@@ -25,6 +22,17 @@ kubectl apply -f letsencrypt.yaml
 kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
 kubectl expose deployment hello-node --port=8080
 kubectl apply -f hello-node-ingress.yaml 
+
+
+# https://docs.aws.amazon.com/eks/latest/userguide/dashboard-tutorial.html
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml
+kubectl apply -f dashboard-sa.yaml
+kubectl apply -f dashboard-ingress.yaml
+
+kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep eks-admin | awk '{print $1}')
+
+curl -v https://kubernetes-dashboard.aws.icteam.be
+
 
 
 
