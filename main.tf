@@ -45,16 +45,6 @@ resource "aws_subnet" "k8s-net2" {
     availability_zone = data.aws_availability_zones.available.names[1]
 }
 
-resource "aws_subnet" "k8s-net3" {
-    tags = merge(var.tags, { 
-      "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-      "kubernetes.io/role/elb" = "1"
-    })
-    vpc_id = aws_vpc.main.id
-    cidr_block = "15.0.3.0/24"
-    availability_zone = data.aws_availability_zones.available.names[2]
-}
-
 resource "aws_iam_role" "demo-cluster-role" {
   name = "demo-cluster-role"
   tags = var.tags
@@ -86,7 +76,7 @@ resource "aws_eks_cluster" "demo" {
   role_arn = aws_iam_role.demo-cluster-role.arn
 
   vpc_config {
-    subnet_ids         = [ aws_subnet.k8s-net1.id, aws_subnet.k8s-net2.id, aws_subnet.k8s-net3.id ] 
+    subnet_ids         = [ aws_subnet.k8s-net1.id, aws_subnet.k8s-net2.id ] 
   }
 
   depends_on = [
@@ -132,41 +122,13 @@ resource "aws_eks_node_group" "demo" {
   node_role_arn   = aws_iam_role.demo-node-role.arn
   subnet_ids      = [ aws_subnet.k8s-net1.id, aws_subnet.k8s-net2.id ]
   instance_types  = [ "t3.medium" ]
+  disk_size       = 5
 
   scaling_config {
     desired_size = 1
     max_size     = 2
     min_size     = 1
   }
-
-  #remote_access {
-  #  ec2_ssh_key = aws_key_pair.ssh.key_name
-  #}
-
-  depends_on = [
-    aws_iam_role_policy_attachment.demo-node-AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.demo-node-AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.demo-node-AmazonEC2ContainerRegistryReadOnly,
-  ]
-}
-
-resource "aws_eks_node_group" "public" {
-  cluster_name    = aws_eks_cluster.demo.name
-  tags     = var.tags
-  node_group_name = "public"
-  node_role_arn   = aws_iam_role.demo-node-role.arn
-  subnet_ids      = [ aws_subnet.k8s-net3.id ]
-  instance_types  = [ "t3.micro" ]
-
-  scaling_config {
-    desired_size = 1
-    max_size     = 2
-    min_size     = 1
-  }
-
-  #remote_access {
-  #  ec2_ssh_key = aws_key_pair.ssh.key_name
-  #}
 
   depends_on = [
     aws_iam_role_policy_attachment.demo-node-AmazonEKSWorkerNodePolicy,
