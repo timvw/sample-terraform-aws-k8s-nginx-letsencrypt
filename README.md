@@ -17,3 +17,14 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/ngin
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.29.0/deploy/static/provider/aws/service-l4.yaml
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.29.0/deploy/static/provider/aws/patch-configmap-l4.yaml
 
+
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.13.0/cert-manager.yaml
+kubectl apply -f letsencrypt.yaml
+
+
+kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
+kubectl expose deployment hello-node --port=8080
+kubectl apply -f hello-node-ingress.yaml 
+
+
+
