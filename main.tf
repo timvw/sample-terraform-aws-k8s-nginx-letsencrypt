@@ -50,6 +50,7 @@ resource "aws_iam_role" "demo-cluster-role" {
   tags = var.tags
 
   assume_role_policy = jsonencode({
+      Version   = "2008-10-17"
       Statement = [{
           Action = "sts:AssumeRole"
           Effect = "Allow"
@@ -90,6 +91,7 @@ resource "aws_iam_role" "demo-node-role" {
   tags = var.tags
 
   assume_role_policy = jsonencode({
+      Version   = "2008-10-17"
       Statement = [{
           Action = "sts:AssumeRole"
           Effect = "Allow"
